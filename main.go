@@ -36,6 +36,7 @@ func main() {
 	router.HandleFunc("/bank", controller.AddBank(db)).Methods("POST")
 	router.HandleFunc("/bank", controller.UpdateBank(db)).Methods("PUT")
 	router.HandleFunc("/bank/{id}", controller.DeleteBank(db)).Methods("DELETE")
+	router.HandleFunc("/upload", controller.Upload(db)).Methods("POST")
 
 	fmt.Println("Starting....")
 

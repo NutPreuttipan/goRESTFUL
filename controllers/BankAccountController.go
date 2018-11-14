@@ -1,6 +1,13 @@
 package controllers
 
 import (
+	"text/template"
+	"crypto/md5"
+	"time"
+	"fmt"
+	"strings"
+	"os"
+	"io"
 	"strconv"
 	"database/sql"
 	"encoding/json"
@@ -9,6 +16,7 @@ import (
 	"../models"
 	"../repository/BankAccount"
 	"github.com/gorilla/mux"
+	"github.com/segmentio/ksuid"
 	
 )
 
@@ -20,6 +28,19 @@ func logFatal(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func after(value string, a string) string {
+    // Get substring after a string.
+    pos := strings.LastIndex(value, a)
+    if pos == -1 {
+        return ""
+    }
+    adjustedPos := pos + len(a)
+    if adjustedPos >= len(value) {
+        return ""
+    }
+    return value[adjustedPos:len(value)]
 }
 
 func (c Controller) GetBanks(db *sql.DB) http.HandlerFunc {
@@ -97,6 +118,49 @@ func (c Controller) DeleteBank(db *sql.DB) http.HandlerFunc {
 		// response.ID = rowsDeleted
 		// response.Status = "Success"
 		json.NewEncoder(w).Encode(rowsDeleted)
+	}
+}
+
+func (c Controller) Upload(db *sql.DB) http.HandlerFunc {
+	return func (w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-type","application/json")
+		var imageName models.Upload
+
+		fmt.Println("method:", r.Method)
+		if r.Method == "GET" {
+			crutime := time.Now().Unix()
+			h := md5.New()
+			io.WriteString(h, strconv.FormatInt(crutime, 10))
+			token := fmt.Sprintf("%x", h.Sum(nil))
+	
+			t, _ := template.ParseFiles("upload.gtpl")
+			t.Execute(w, token)
+		} else {
+			r.ParseMultipartForm(32 << 20)
+			file, handler, err := r.FormFile("file")
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			defer file.Close()
+			fmt.Fprintf(w, "%v", handler.Header)
+
+			guid := ksuid.New()
+			fileType := handler.Filename
+
+			f, err := os.OpenFile("uploadfile/" + guid.String() + "." + after(fileType, "."), os.O_WRONLY|os.O_CREATE, 0666)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			defer f.Close()
+			io.Copy(f, file)
+			
+			name := f.Name()
+			imageName.ImagePath = after(name,"/")
+
+			json.NewEncoder(w).Encode(imageName)
+		}
 	}
 }
 	
