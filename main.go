@@ -1,15 +1,16 @@
 package main
 
 import (
-	"log"
-	"github.com/subosito/gotenv"
-	"github.com/gorilla/mux"
-	"fmt"
-	"net/http"
 	"database/sql"
-	"./models"
-	"./driver"
+	"fmt"
+	"log"
+	"net/http"
+
 	"./controllers"
+	"./driver"
+	"./models"
+	"github.com/gorilla/mux"
+	"github.com/subosito/gotenv"
 )
 
 var bankAccounts []models.BankAccount
@@ -38,9 +39,9 @@ func main() {
 	router.HandleFunc("/bank/{id}", controller.DeleteBank(db)).Methods("DELETE")
 	router.HandleFunc("/upload", controller.Upload(db)).Methods("POST")
 
-	fmt.Println("Starting....")
+	fmt.Println("Starting dbRESTFUL....")
 
-	log.Fatal(http.ListenAndServe(":8080",router))
+	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
 // func getBanks(w http.ResponseWriter, r *http.Request) {
@@ -54,15 +55,15 @@ func main() {
 // 	defer rows.Close()
 
 // 	for rows.Next() {
-// 		err := rows.Scan(&bankAccount.ID, 
-// 			&bankAccount.BankName, 
+// 		err := rows.Scan(&bankAccount.ID,
+// 			&bankAccount.BankName,
 // 			&bankAccount.BankBranch,
-// 			&bankAccount.AccountNo, 
+// 			&bankAccount.AccountNo,
 // 			&bankAccount.AccountName,
-// 			&bankAccount.AccountType, 
+// 			&bankAccount.AccountType,
 // 		)
 // 		logFatal(err)
-		
+
 // 		bankAccounts = append(bankAccounts, bankAccount)
 // 	}
 
@@ -77,10 +78,10 @@ func main() {
 
 // 	rows := db.QueryRow("select * from \"TBBankAccount\" where id = $1", id)
 
-// 	err := rows.Scan(&bankAccount.ID, 
-// 		&bankAccount.BankName, 
-// 		&bankAccount.BankBranch, 
-// 		&bankAccount.AccountNo, 
+// 	err := rows.Scan(&bankAccount.ID,
+// 		&bankAccount.BankName,
+// 		&bankAccount.BankBranch,
+// 		&bankAccount.AccountNo,
 // 		&bankAccount.AccountName,
 // 		&bankAccount.AccountType,
 // 	)
@@ -89,10 +90,10 @@ func main() {
 // 	json.NewEncoder(w).Encode(bankAccount)
 // }
 
-// func addBank(w http.ResponseWriter, r *http.Request) {	
+// func addBank(w http.ResponseWriter, r *http.Request) {
 // 	w.Header().Set("Content-type","application/json")
 // 	var bankAccount models.BankAccount
-// 	var bookID int 
+// 	var bookID int
 
 // 	json.NewDecoder(r.Body).Decode(&bankAccount)
 

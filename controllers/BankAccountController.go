@@ -1,23 +1,23 @@
 package controllers
 
 import (
-	"text/template"
 	"crypto/md5"
-	"time"
-	"fmt"
-	"strings"
-	"os"
-	"io"
-	"strconv"
 	"database/sql"
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
+	"strings"
+	"text/template"
+	"time"
+
 	"../models"
 	"../repository/BankAccount"
 	"github.com/gorilla/mux"
 	"github.com/segmentio/ksuid"
-	
 )
 
 type Controller struct{}
@@ -31,35 +31,34 @@ func logFatal(err error) {
 }
 
 func after(value string, a string) string {
-    // Get substring after a string.
-    pos := strings.LastIndex(value, a)
-    if pos == -1 {
-        return ""
-    }
-    adjustedPos := pos + len(a)
-    if adjustedPos >= len(value) {
-        return ""
-    }
-    return value[adjustedPos:len(value)]
+	// Get substring after a string.
+	pos := strings.LastIndex(value, a)
+	if pos == -1 {
+		return ""
+	}
+	adjustedPos := pos + len(a)
+	if adjustedPos >= len(value) {
+		return ""
+	}
+	return value[adjustedPos:len(value)]
 }
 
 func (c Controller) GetBanks(db *sql.DB) http.HandlerFunc {
-	return func (w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-type","application/json")
-	
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-type", "application/json")
+
 		var bankAccount models.BankAccount
 		bankAccounts = []models.BankAccount{}
 		bankAccountRepo := bankAccountRepository.BankAccountRepository{}
 
-		bankAccounts = bankAccountRepo.GetBanks(db,bankAccount,bankAccounts)
-		
+		bankAccounts = bankAccountRepo.GetBanks(db, bankAccount, bankAccounts)
 		json.NewEncoder(w).Encode(bankAccounts)
 	}
 }
 
 func (c Controller) GetBank(db *sql.DB) http.HandlerFunc {
-	return func (w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-type","application/json")
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-type", "application/json")
 
 		var bankAccount models.BankAccount
 		param := mux.Vars(r)
@@ -68,17 +67,17 @@ func (c Controller) GetBank(db *sql.DB) http.HandlerFunc {
 		bankAccountRepo := bankAccountRepository.BankAccountRepository{}
 
 		bankAccount = bankAccountRepo.GetBank(db, bankAccount, id)
-	
+
 		json.NewEncoder(w).Encode(bankAccount)
 	}
 }
 
 func (c Controller) AddBank(db *sql.DB) http.HandlerFunc {
-	return func (w http.ResponseWriter, r *http.Request) {	
-		w.Header().Set("Content-type","application/json")
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-type", "application/json")
 
 		var bankAccount models.BankAccount
-		var bookID int 
+		var bookID int
 		json.NewDecoder(r.Body).Decode(&bankAccount)
 		bankAccountRepo := bankAccountRepository.BankAccountRepository{}
 
@@ -89,15 +88,15 @@ func (c Controller) AddBank(db *sql.DB) http.HandlerFunc {
 }
 
 func (c Controller) UpdateBank(db *sql.DB) http.HandlerFunc {
-	return func (w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-type","application/json")
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-type", "application/json")
 		var bankAccount models.BankAccount
 		// var response apiResponse
 		json.NewDecoder(r.Body).Decode(&bankAccount)
 		bankAccountRepo := bankAccountRepository.BankAccountRepository{}
 
 		rowsUpdated := bankAccountRepo.UpdateBank(db, bankAccount)
-	
+
 		// response.ID = rowsUpdated
 		// response.Status = "Success"
 		json.NewEncoder(w).Encode(rowsUpdated)
@@ -105,8 +104,8 @@ func (c Controller) UpdateBank(db *sql.DB) http.HandlerFunc {
 }
 
 func (c Controller) DeleteBank(db *sql.DB) http.HandlerFunc {
-	return func (w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-type","application/json")
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-type", "application/json")
 		// var response apiResponse
 		param := mux.Vars(r)
 		id, err := strconv.Atoi(param["id"])
@@ -114,7 +113,7 @@ func (c Controller) DeleteBank(db *sql.DB) http.HandlerFunc {
 		bankAccountRepo := bankAccountRepository.BankAccountRepository{}
 
 		rowsDeleted := bankAccountRepo.DeleteBank(db, id)
-	
+
 		// response.ID = rowsDeleted
 		// response.Status = "Success"
 		json.NewEncoder(w).Encode(rowsDeleted)
@@ -122,9 +121,9 @@ func (c Controller) DeleteBank(db *sql.DB) http.HandlerFunc {
 }
 
 func (c Controller) Upload(db *sql.DB) http.HandlerFunc {
-	return func (w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-type","application/json")
-		var imageName models.Upload
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-type", "application/json")
+		var upload models.Upload
 
 		fmt.Println("method:", r.Method)
 		if r.Method == "GET" {
@@ -132,7 +131,7 @@ func (c Controller) Upload(db *sql.DB) http.HandlerFunc {
 			h := md5.New()
 			io.WriteString(h, strconv.FormatInt(crutime, 10))
 			token := fmt.Sprintf("%x", h.Sum(nil))
-	
+
 			t, _ := template.ParseFiles("upload.gtpl")
 			t.Execute(w, token)
 		} else {
@@ -148,26 +147,18 @@ func (c Controller) Upload(db *sql.DB) http.HandlerFunc {
 			guid := ksuid.New()
 			fileType := handler.Filename
 
-			f, err := os.OpenFile("uploadfile/" + guid.String() + "." + after(fileType, "."), os.O_WRONLY|os.O_CREATE, 0666)
+			f, err := os.OpenFile("uploadfile/"+guid.String()+"."+after(fileType, "."), os.O_WRONLY|os.O_CREATE, 0666)
 			if err != nil {
 				fmt.Println(err)
 				return
 			}
 			defer f.Close()
 			io.Copy(f, file)
-			
-			name := f.Name()
-			imageName.ImagePath = after(name,"/")
 
-			json.NewEncoder(w).Encode(imageName)
+			name := f.Name()
+			upload.ImagePath = after(name, "/")
+
+			json.NewEncoder(w).Encode(upload)
 		}
 	}
 }
-	
-
-
-
-
-
-
-
