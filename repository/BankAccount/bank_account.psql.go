@@ -1,7 +1,7 @@
 package bankAccountRepository
 
 import (
-	"../../models"
+	"gorestful/models"
 	"database/sql"
 	"log"
 )

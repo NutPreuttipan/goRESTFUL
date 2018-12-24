@@ -6,9 +6,9 @@ import (
 	"log"
 	"net/http"
 
-	"./controllers"
-	"./driver"
-	"./models"
+	"gorestful/controllers"
+	"gorestful/driver"
+	"gorestful/models"
 	"github.com/gorilla/mux"
 	"github.com/subosito/gotenv"
 )

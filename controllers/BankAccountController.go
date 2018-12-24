@@ -14,8 +14,8 @@ import (
 	"text/template"
 	"time"
 
-	"../models"
-	"../repository/BankAccount"
+	"gorestful/models"
+	"gorestful/repository/BankAccount"
 	"github.com/gorilla/mux"
 	"github.com/segmentio/ksuid"
 )
